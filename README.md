@@ -5,7 +5,7 @@ Hura Chatbot is a conversational web application where users can interact with a
 
 - Chatbot interaction: Users can send messages to a bot and receive responses.
 - Weather forecast: Users can enter a city to receive a weather forecast including temperature and precipitation for a specific day.
-- User-friendly interface built using TailwindCSS for responsive design.
+- User-friendly interface built  for responsive design.
 
 ## Technologies Used
 
