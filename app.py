@@ -1,7 +1,11 @@
 from flask import Flask, render_template, request, jsonify
 import requests
 import datetime
-import json
+import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 app = Flask(__name__)
 
@@ -56,9 +60,9 @@ def fetch_weather_data(api_key, city):
         return daily_forecasts
     return None
 
-# Gemini API configuration
-gemini_api_url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent"
-gemini_api_key = "AIzaSyBZSOGg5wWysG3QWv5-N4a9UW5Q2kG8saI"
+# Get the Gemini API URL and API Key from environment variables
+gemini_api_url = os.getenv("GEMINI_API_URL")
+gemini_api_key = os.getenv("GEMINI_API_KEY")
 
 def get_gemini_response(query, api_key):
     """Fetch the response from Gemini API."""
@@ -82,7 +86,7 @@ def get_gemini_response(query, api_key):
     try:
         # Sending a POST request to the Gemini API
         response = requests.post(gemini_api_url, json=payload, headers=headers, params=params)
-        response.raise_for_status()  # Raise an HTTPError for bad responses (e.g., 4xx, 5xx)
+        response.raise_for_status()  
 
         # Extracting the chatbot response from the API
         data = response.json()
@@ -101,9 +105,10 @@ def index():
 @app.route('/weather', methods=['POST'])
 def weather():
     city = request.form.get('city')
-    api_key = "53e7dc38a79a5d65c96022d8c8ddbe95"  
+    # Get the Weather API Key from environment variables
+    weather_api_key = os.getenv("WEATHER_API_KEY")
     
-    daily_forecasts = fetch_weather_data(api_key, city)
+    daily_forecasts = fetch_weather_data(weather_api_key, city)
     if daily_forecasts:
         mean_temp = sum([day['predicted_temperature'] for day in daily_forecasts]) / len(daily_forecasts)
         mean_precip = sum([day['predicted_precipitation'] for day in daily_forecasts]) / len(daily_forecasts)
