@@ -168,43 +168,52 @@
         const userInput = document.getElementById("user-input").value.trim();
         if (userInput === "") return;
 
-        // Display user message
-        const userMessage = document.createElement("div");
-        userMessage.classList.add("message-box");
-        userMessage.innerHTML = `<div class="user-message">${userInput}</div>`;
-        document.getElementById("chat-messages").appendChild(userMessage);
+        // Create user message HTML
+        const userMessageHTML = `<div class="message-box"><div class="user-message">${userInput}</div></div>`;
+
+        // Append user message to chat in a single DOM update
+        const chatMessages = document.getElementById("chat-messages");
+        chatMessages.innerHTML += userMessageHTML;
         document.getElementById("user-input").value = "";
 
-        // Simulate a chatbot response
+        // Scroll to the latest message
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+
+        // Fetch chatbot response
         fetchChatbotResponse(userInput);
       }
 
       function fetchChatbotResponse(userInput) {
+        // Use Fetch API to send the message and receive a response
         fetch("/chat", {
           method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
           body: new URLSearchParams({ message: userInput }),
         })
           .then((response) => response.json())
           .then((data) => {
+            // Format the chatbot response
             const botMessageContent = formatBotResponse(data.response);
 
-            // Display bot response
-            const botMessage = document.createElement("div");
-            botMessage.classList.add("message-box");
-            botMessage.innerHTML = `<div class="bot-message">${botMessageContent}</div>`;
-            document.getElementById("chat-messages").appendChild(botMessage);
+            // Append bot response to chat in a single DOM update
+            const chatMessages = document.getElementById("chat-messages");
+            chatMessages.innerHTML += `<div class="message-box"><div class="bot-message">${botMessageContent}</div></div>`;
 
             // Scroll to the latest message
-            const chatMessages = document.getElementById("chat-messages");
             chatMessages.scrollTop = chatMessages.scrollHeight;
+          })
+          .catch((error) => {
+            console.error("Error fetching chatbot response:", error);
           });
       }
 
       function formatBotResponse(response) {
         return response
-          .replace(/\*(.*?)\*/g, "<b>$1</b>")
-          .replace(/(^|\s):(\w+)/g, "$1<b>$2</b>")
-          .replace(/\n/g, "<br>");
+          .replace(/\*\*(.*?)\*\*/g, "$1") // Remove ** symbols
+          .replace(/\*(.*?)\*/g, "$1") // Remove * symbols
+          .replace(/(^|\s)(\w+):/g, "$1<b>$2</b>:") // Bold words before a colon
+          .replace(/(^|\s)(\w+);/g, "$1<b>$2</b>;") // Bold words before a semi-colon
+          .replace(/\n/g, "<br>"); // Preserve line breaks
       }
 
       document
