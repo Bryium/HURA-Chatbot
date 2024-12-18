@@ -209,11 +209,11 @@
 
       function formatBotResponse(response) {
         return response
-          .replace(/\*\*(.*?)\*\*/g, "$1") // Remove ** symbols
-          .replace(/\*(.*?)\*/g, "$1") // Remove * symbols
-          .replace(/(^|\s)(\w+):/g, "$1<b>$2</b>:") // Bold words before a colon
-          .replace(/(^|\s)(\w+);/g, "$1<b>$2</b>;") // Bold words before a semi-colon
-          .replace(/\n/g, "<br>"); // Preserve line breaks
+          .replace(/\*\*(.*?)\*\*/g, "$1")
+          .replace(/\*(.*?)\*/g, "$1")
+          .replace(/(^|\s)(\w+):/g, "$1<b>$2</b>:")
+          .replace(/(^|\s)(\w+);/g, "$1<b>$2</b>;")
+          .replace(/\n/g, "<br>");
       }
 
       document
