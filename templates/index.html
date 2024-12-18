@@ -39,29 +39,27 @@
 
       .message-box {
         display: flex;
-        justify-content: space-between;
-        align-items: center;
         margin-bottom: 10px;
-      }
-
-      .message-box .user-message,
-      .message-box .bot-message {
-        padding: 10px 15px;
-        border-radius: 25px;
-        font-size: 1rem;
-        max-width: 75%;
       }
 
       .user-message {
         background-color: #4caf50;
         color: white;
+        border-radius: 25px;
+        padding: 10px 15px;
+        max-width: 75%;
         align-self: flex-end;
+        margin-left: auto;
       }
 
       .bot-message {
         background-color: #f1f1f1;
         color: black;
+        border-radius: 25px;
+        padding: 10px 15px;
+        max-width: 75%;
         align-self: flex-start;
+        margin-right: auto;
       }
 
       .input-box {
@@ -135,24 +133,20 @@
 
         <!-- Chat messages will go here -->
         <div id="chat-messages">
-          <!-- Example user message -->
           <div class="message-box">
             <div class="user-message">Hello, chatbot!</div>
           </div>
-          <!-- Example bot message -->
           <div class="message-box">
             <div class="bot-message">Hello! How can I assist you today?</div>
           </div>
         </div>
 
-        <!-- User input for chat -->
         <div class="input-box">
           <input type="text" id="user-input" placeholder="Ask me anything..." />
           <button onclick="sendMessage()">Send</button>
         </div>
       </div>
 
-      <!-- Weather Prediction Section -->
       <div class="weather-box">
         <h2>Weather Forecast</h2>
         <form id="weather-form">
@@ -165,77 +159,66 @@
           <button type="submit">Get Weather</button>
         </form>
 
-        <!-- Weather results will be shown here -->
-        <div id="weather-result">
-          <!-- Example forecast -->
-          <div class="weather-forecast">
-            <div class="forecast-item">
-              <div class="forecast-item-title">Date</div>
-              <div>2024-12-12</div>
-            </div>
-            <div class="forecast-item">
-              <div class="forecast-item-title">Temperature</div>
-              <div>25°C</div>
-            </div>
-            <div class="forecast-item">
-              <div class="forecast-item-title">Precipitation</div>
-              <div>No rain</div>
-            </div>
-          </div>
-        </div>
+        <div id="weather-result"></div>
       </div>
     </div>
 
     <script>
       function sendMessage() {
-        var userInput = document.getElementById("user-input").value;
-        if (userInput.trim() !== "") {
-          // Display the user message
-          var messageBox = document.createElement("div");
-          messageBox.classList.add("message-box");
-          messageBox.innerHTML =
-            '<div class="user-message">' + userInput + "</div>";
-          document.getElementById("chat-messages").appendChild(messageBox);
-          document.getElementById("user-input").value = "";
+        const userInput = document.getElementById("user-input").value.trim();
+        if (userInput === "") return;
 
-          // Send the message to the backend (using AJAX or Fetch)
-          fetch("/chat", {
-            method: "POST",
-            body: new URLSearchParams({
-              message: userInput,
-            }),
-          })
-            .then((response) => response.json())
-            .then((data) => {
-              var botMessage = data.response;
+        // Display user message
+        const userMessage = document.createElement("div");
+        userMessage.classList.add("message-box");
+        userMessage.innerHTML = `<div class="user-message">${userInput}</div>`;
+        document.getElementById("chat-messages").appendChild(userMessage);
+        document.getElementById("user-input").value = "";
 
-              // Display the bot message
-              var messageBox = document.createElement("div");
-              messageBox.classList.add("message-box");
-              messageBox.innerHTML =
-                '<div class="bot-message">' + botMessage + "</div>";
-              document.getElementById("chat-messages").appendChild(messageBox);
-            });
-        }
+        // Simulate a chatbot response
+        fetchChatbotResponse(userInput);
       }
 
-      // Weather form submit
+      function fetchChatbotResponse(userInput) {
+        fetch("/chat", {
+          method: "POST",
+          body: new URLSearchParams({ message: userInput }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            const botMessageContent = formatBotResponse(data.response);
+
+            // Display bot response
+            const botMessage = document.createElement("div");
+            botMessage.classList.add("message-box");
+            botMessage.innerHTML = `<div class="bot-message">${botMessageContent}</div>`;
+            document.getElementById("chat-messages").appendChild(botMessage);
+
+            // Scroll to the latest message
+            const chatMessages = document.getElementById("chat-messages");
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+          });
+      }
+
+      function formatBotResponse(response) {
+        return response
+          .replace(/\*(.*?)\*/g, "<b>$1</b>")
+          .replace(/(^|\s):(\w+)/g, "$1<b>$2</b>")
+          .replace(/\n/g, "<br>");
+      }
+
       document
         .getElementById("weather-form")
         .addEventListener("submit", function (event) {
           event.preventDefault();
-          var city = document.getElementById("city-input").value;
+          const city = document.getElementById("city-input").value;
           if (city.trim() !== "") {
-            // Display loading message
             document.getElementById("weather-result").innerHTML =
               "Fetching weather data...";
 
-            // Call the weather API (you can adjust this to call your Flask route)
             fetch("/weather", {
               method: "POST",
-              body: new URLSearchParams({
-                city: city,
-              }),
+              body: new URLSearchParams({ city }),
             })
               .then((response) => response.json())
               .then((data) => {
@@ -243,25 +226,25 @@
                   document.getElementById("weather-result").innerHTML =
                     data.error;
                 } else {
-                  var forecasts = data.daily_forecasts
-                    .map((forecast) => {
-                      return `
-                            <div class="weather-forecast">
-                                <div class="forecast-item">
-                                  <div class="forecast-item-title">Date</div>
-                                  <div>${forecast.date}</div>
-                                </div>
-                                <div class="forecast-item">
-                                  <div class="forecast-item-title">Temperature</div>
-                                  <div>${forecast.predicted_temperature}°C</div>
-                                </div>
-                                <div class="forecast-item">
-                                  <div class="forecast-item-title">Precipitation</div>
-                                  <div>${forecast.predicted_precipitation} mm</div>
-                                </div>
-                            </div>
-                        `;
-                    })
+                  const forecasts = data.daily_forecasts
+                    .map(
+                      (forecast) => `
+                      <div class="weather-forecast">
+                        <div class="forecast-item">
+                          <div class="forecast-item-title">Date</div>
+                          <div>${forecast.date}</div>
+                        </div>
+                        <div class="forecast-item">
+                          <div class="forecast-item-title">Temperature</div>
+                          <div>${forecast.predicted_temperature}°C</div>
+                        </div>
+                        <div class="forecast-item">
+                          <div class="forecast-item-title">Precipitation</div>
+                          <div>${forecast.predicted_precipitation} mm</div>
+                        </div>
+                      </div>
+                    `
+                    )
                     .join("");
                   document.getElementById("weather-result").innerHTML =
                     forecasts;
