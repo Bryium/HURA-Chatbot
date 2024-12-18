@@ -126,5 +126,5 @@ def chat():
     chatbot_response = get_gemini_response(user_input, gemini_api_key)
     return jsonify({"response": chatbot_response})
 
-if __name__ == '__main__':
-    app.run(debug=True)
+# Entry point for Vercel
+app = app
